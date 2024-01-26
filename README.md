@@ -8,7 +8,7 @@ Update for this version: Initial release.
 #### Notice:
 We have internally reviewed this script multiple times. However, should there be any concerns or feedback (i.e., if you find errors in this code), please let us know. We are open to feedback on the code until February 16, 2024, and will respond within 3 calendar days.
 
-February 21, 2024, is the cut-off date for the final update in the unlikely event of updating this script. Please mark this date for the final sync (git pull origin eval) of this repository. The code will not be updated after this date to minimize confusion.
+February 21, 2024, is the cut-off date for the final update in the unlikely event of updating this script. Please mark this date for the final sync (`git pull origin current`) of this repository. The code will not be updated after this date to minimize confusion.
 
 
 ## Submission formats
