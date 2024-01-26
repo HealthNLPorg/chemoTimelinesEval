@@ -38,9 +38,9 @@ Example of article 1 (empty patient id case):
 Clone this repository by
 ```bash
 export EVAL_LIB_PATH=${HOME}
-#export EVAL_LIB_PATH=<Or your desired path>
+#export EVAL_LIB_PATH=<Or path to clone this repo>
 cd ${EVAL_LIB_PATH}
-git clone <Jiarui - TODO: replace this with our repo path - maybe ChemoTimelines and with branch name as v2024.01.16>
+git clone https://github.com/BCHHealthNLP/chemoTimelinesEval.git
 ``` 
 
 ### Environments
@@ -53,16 +53,10 @@ pip install -r requirements.txt
 
 We tested this evaluation codes on the following envirenments. 
 * Ubuntu 22.04, python 3.10
-* TODO: Ubuntu, python 3.10
 
-#### TODO... 
-#### To discuss: 
-* clulab/timenorm is in scala...?
-* gold == 0 -> Prec and Rec? both 1?
-* Ids (--gold_id_path) format?
+<hr>
 
-
-# how to understand the evaluation code
+## Description
 
 ### Input:
 
@@ -86,23 +80,25 @@ For each patient, we compare the tuples in gold timelines and in the predicted t
         2. **the range**, meaning the predicted tuple fall in the correct range defined by the begins-on and ends-on dates in gold.
     3. for relaxed to month, we only care about if the predicted year-month matches the one in gold; for relaxed to year, we only care about if the predicted year matches the one in gold.
     
-    ### Running the script
+### Running the script
     
-    here is the example command to run evaluation on breast dev data.
+here is the example command to run evaluation on breast dev data.
+
+```bash
+export DATA_PATH=<path/to/data>
+export PRED_PATH=<path/to/prediction>
+export ID_PATH=<path/to/id files>
     
-    ```bash
-    export DATA_PATH=<path/to/data>
-    
-    python eval_timeline.py \
+python eval_timeline.py \
     --gold_path ${DATA_PATH}/breast_dev_gold_timelines.json \
-    --pred_path ${DATA_PATH}/breast_dev_system_timelines.json \
-    --all_id_path ${DATA_PATH}/breast_dev_all_ids.txt \
+    --pred_path ${PRED_PATH}/breast_dev_system_timelines.json \
+    --all_id_path ${ID_PATH}/breast_dev_all_ids.txt \
     --strict
 
-    # This option will show the official score
-    python eval_timeline.py \
+# This option will show the official score
+python eval_timeline.py \
     --gold_path ${DATA_PATH}/breast_dev_gold_timelines.json \
-    --pred_path ${DATA_PATH}/breast_dev_system_timelines.json \
-    --all_id_path ${DATA_PATH}/breast_dev_all_ids.txt \
+    --pred_path ${PRED_PATH}/breast_dev_system_timelines.json \
+    --all_id_path ${ID_PATH}/breast_dev_all_ids.txt \
     --relaxed_to month
-    ```
+```
