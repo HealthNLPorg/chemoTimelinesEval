@@ -13,12 +13,6 @@ parser = argparse.ArgumentParser(description="")
 
 parser.add_argument("--docker_tsv_output_path", type=str)
 
-parser.add_argument("--prune_by_dtr", action="store_true")
-parser.add_argument("--prune_by_modality", action="store_true")
-parser.add_argument("--prune_by_polarity", action="store_true")
-parser.add_argument("--add_dtr", action="store_true")
-
-# No crc in the shared task data
 parser.add_argument("--cancer_type", choices=["ovarian", "breast", "melanoma"])
 parser.add_argument("--output_dir", type=str)
 
@@ -149,9 +143,7 @@ def keep_normalized_timex(pandas_col) -> bool:
 # upstream to save processing time.
 # you can turn that off in
 # timeline_delegator.py in the Docker
-def convert_docker_output(
-    docker_tsv_output_path: str, prune_by_dtr: bool
-) -> Tuple[List[str], List[str]]:
+def convert_docker_output(docker_tsv_output_path: str) -> Tuple[List[str], List[str]]:
     docker_output_dataframe = pd.read_csv(docker_tsv_output_path, sep="\t")
 
     doc_time_rel_timelines = docker_output_dataframe[
@@ -179,9 +171,6 @@ def convert_docker_output(
         ]
     ].values.tolist()
 
-    # not worring about the patient ID relative timex
-    # mapping for now since that was crc
-
     return timeline_tups, doc_time_rel_timelines
 
 
@@ -189,7 +178,7 @@ def main():
     args = parser.parse_args()
 
     timelines_tups, doc_time_rel_timelines = convert_docker_output(
-        args.docker_tsv_output_path, args.prune_by_dtr
+        args.docker_tsv_output_path
     )
 
     timelines_deduplicated = deduplicate(
@@ -200,23 +189,13 @@ def main():
 
     outfile_name = args.cancer_type + "_dev_system_timelines"
 
-    if args.add_dtr:
-        outfile_name += "_wt_dtr"
-    if args.prune_by_dtr:
-        outfile_name += "_fltr_dtr"
-    if args.prune_by_modality:
-        outfile_name += "_fltr_mdlty"
-    if args.prune_by_polarity:
-        outfile_name += "_fltr_plrty"
     outfile_name += ".json"
-    print(outfile_name)
 
     write_to_output(
         resolved_timelines,
         os.path.join(args.output_dir, outfile_name),
-        # info_map,
-        # info_map_for_error_analysis,
     )
+    print(f"Wrote summarized outputs to {outfile_name}")
 
 
 if __name__ == "__main__":
