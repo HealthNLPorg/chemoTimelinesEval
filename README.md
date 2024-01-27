@@ -11,6 +11,14 @@ We have internally reviewed this script multiple times. However, should there be
 February 21, 2024, is the cut-off date for the final update in the unlikely event of updating this script. Please mark this date for the final sync (`git pull origin current`) of this repository. The code will not be updated after this date to minimize confusion.
 
 
+## Summarizing Docker output
+
+Obtain a summarized JSON timeline via running `docker_output_to_timeline.py` on the Docker output TSV via:
+```bash
+python docker_output_to_timeline.py --docker_tsv_output_path <unsummarized Docker output TSV> --cancer_type <cancer type> --output_dir <output_dir>
+```
+Assuming successful completion the resulting summarized JSON can be passed to `eval_timeline.py` via the `--pred_path` parameter.
+
 ## Submission formats
 ### Checklists for formatting:
 1. The file should include all patient ids in key of json file even if there is no predicted timeline.
