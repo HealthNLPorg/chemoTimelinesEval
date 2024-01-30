@@ -5,7 +5,7 @@ import re
 import argparse
 import os
 import json
-from typing import List, Tuple
+from typing import List, Set, Tuple
 import pandas as pd
 from collections import defaultdict
 
@@ -16,7 +16,7 @@ parser.add_argument("--docker_tsv_output_path", type=str)
 parser.add_argument("--cancer_type", choices=["ovarian", "breast", "melanoma"])
 parser.add_argument("--output_dir", type=str)
 
-CHEMO_MENTIONS = [
+CHEMO_MENTIONS = {
     "chemotherapy",
     "chemo",
     "chem",
@@ -34,7 +34,8 @@ CHEMO_MENTIONS = [
     "chemotherapy's",
     "chemotheray",
     "chemoradiation",
-]
+}
+
 label_to_hierarchy = {
     "begins-on": 1,
     "ends-on": 1,
@@ -42,7 +43,6 @@ label_to_hierarchy = {
     "contains-1": 2,
     "before": 3,
 }
-RELATIVE_TIMEX = ["today", "last", "yesterday", "ago", "next", "tomorrow"]
 
 NORMALIZED_TIMEXES_TO_SKIP = {"Luz 5", "P2000D"}
 
@@ -53,12 +53,10 @@ def rank_labels(labels):
     return label_rankings[0][0]
 
 
-def deduplicate(timelines, dct_timelines):
+def deduplicate(timelines):
     merged_rows = defaultdict(lambda: defaultdict(set))
-    merged_rows_index = defaultdict(lambda: defaultdict(list))
     chemo_date_map = defaultdict(lambda: defaultdict(list))
-    all_pred_info_map = defaultdict(lambda: defaultdict(list))
-    for r_idx, row in enumerate(timelines):
+    for row in timelines:
         source_id, source_text, rel, target_id, target_text = row
         source_text = source_text.lower()
         target_text = target_text.lower()
@@ -71,18 +69,12 @@ def deduplicate(timelines, dct_timelines):
         patient_id = note_id.split("_")[0]
 
         merged_rows[patient_id][(source_text, rel)].add(target_text)
-        merged_rows_index[patient_id][(source_text, rel, target_text)].append(r_idx)
 
         chemo_date_map[patient_id][(target_text, rel)].append(source_text)
-        all_pred_info_map[patient_id][source_text + "_*_" + rel].append(
-            [target_id, target_text]
-        )
 
     deduplicated = defaultdict(list)
-    deduplicated_info_idx = defaultdict(list)
     for patient, treatments in merged_rows.items():
         one_patient_timelines = []
-        one_patient_timelines_idx = []
         chemos_same_day_rel = chemo_date_map[patient]
         for k, v in treatments.items():
             for target in v:
@@ -95,17 +87,10 @@ def deduplicate(timelines, dct_timelines):
                     if not has_specific_chemo:
                         if [k[0], k[1], target] not in one_patient_timelines:
                             one_patient_timelines.append([k[0], k[1], target])
-                            timelines_idx = merged_rows_index[patient][
-                                (k[0], k[1], target)
-                            ]
-                            one_patient_timelines_idx.append(timelines_idx)
                 else:
                     if [k[0], k[1], target] not in one_patient_timelines:
                         one_patient_timelines.append([k[0], k[1], target])
-                        timelines_idx = merged_rows_index[patient][(k[0], k[1], target)]
-                        one_patient_timelines_idx.append(timelines_idx)
         deduplicated[patient] = one_patient_timelines
-        deduplicated_info_idx[patient] = one_patient_timelines_idx
 
     return deduplicated
 
@@ -143,12 +128,9 @@ def keep_normalized_timex(pandas_col) -> bool:
 # upstream to save processing time.
 # you can turn that off in
 # timeline_delegator.py in the Docker
-def convert_docker_output(docker_tsv_output_path: str) -> Tuple[List[str], List[str]]:
+def convert_docker_output(docker_tsv_output_path: str) -> Tuple[List[str], Set[str]]:
     docker_output_dataframe = pd.read_csv(docker_tsv_output_path, sep="\t")
 
-    doc_time_rel_timelines = docker_output_dataframe[
-        ["chemo_annotation_id", "chemo_text", "DCT"]
-    ].values.tolist()
     no_none_tlinks = docker_output_dataframe[
         ~docker_output_dataframe["tlink"].isin(["none"])
     ]
@@ -161,6 +143,10 @@ def convert_docker_output(docker_tsv_output_path: str) -> Tuple[List[str], List[
         normed_timexes_with_tlinks.apply(keep_normalized_timex, axis=1)
     ]
 
+    no_discovery_pt_ids = set(docker_output_dataframe["patient_id"]) - set(
+        acceptable_normed_timexes_with_tlinks["patient_id"]
+    )
+
     timeline_tups = acceptable_normed_timexes_with_tlinks[
         [
             "chemo_annotation_id",
@@ -171,21 +157,20 @@ def convert_docker_output(docker_tsv_output_path: str) -> Tuple[List[str], List[
         ]
     ].values.tolist()
 
-    return timeline_tups, doc_time_rel_timelines
+    return timeline_tups, no_discovery_pt_ids
 
 
 def main():
     args = parser.parse_args()
 
-    timelines_tups, doc_time_rel_timelines = convert_docker_output(
-        args.docker_tsv_output_path
-    )
+    timelines_tups, no_discovery_pt_ids = convert_docker_output(args.docker_tsv_output_path)
 
-    timelines_deduplicated = deduplicate(
-        timelines_tups,
-        doc_time_rel_timelines,
-    )
+    timelines_deduplicated = deduplicate(timelines_tups)
     resolved_timelines = conflict_resolution(timelines_deduplicated)
+
+    # dumbest hack I've written so far this year but
+    for patient_id in no_discovery_pt_ids:
+        resolved_timelines[patient_id] = []
 
     outfile_name = args.cancer_type + "_dev_system_timelines"
 
