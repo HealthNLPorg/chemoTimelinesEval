@@ -7,7 +7,7 @@ from datetime import datetime
 
 import dateutil.parser
 
-VERSION = "v20240116"
+VERSION = "v20240223"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -400,6 +400,8 @@ def evaluation(gold, pred, args):
         logger.debug(f"{rmv_from_fn_label}")
 
     if len(true_pos) + len(false_neg) == 0:
+        precision, recall, f1 = 0, 0, 0
+    elif len(true_pos) + len(false_pos) == 0:
         precision, recall, f1 = 0, 0, 0
     else:
         precision = len(true_pos) / (len(true_pos) + len(false_pos))

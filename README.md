@@ -2,8 +2,9 @@
 
 ##  Evaluation script versioning
 
-#### Current timestamp (YYYY-MM-DD): 2024-01-16
-Update for this version: Initial release.
+#### Current timestamp (YYYY-MM-DD): 2024-02-23
+Update for 2024-02-23 version: Fix `divided by zero exception` Line 405 at `eval_timeline.py`. 
+<br>Update for 2024-01-16 version: Initial release.
 
 #### Notice:
 We have internally reviewed this script multiple times. However, should there be any concerns or feedback (i.e., if you find errors in this code), please let us know. We are open to feedback on the code until ~February 16, 2024~ **March 10, 2024**, and will respond within 3 calendar days.
