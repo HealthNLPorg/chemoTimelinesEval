@@ -7,7 +7,7 @@ from datetime import datetime
 
 import dateutil.parser
 
-VERSION = "v20240223"
+VERSION = "v20240305"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -595,8 +595,14 @@ if __name__ == "__main__":
             1.0, 1.0, and 1.0 for the given patient in local precision, recall, and F1, respectively.
         """
         if len(gold_timeline) == 0:
-            true_pos, false_pos, false_neg = [], [], []
-            p, r, f_score = 1, 1, 1
+            if len(pred_timeline) == 0:
+                true_pos, false_pos, false_neg = [], [], []
+                p, r, f_score = 1, 1, 1
+            else:
+                true_pos = []
+                false_pos = pred_timeline
+                false_neg = []
+                p, r, f_score = 0, 0, 0
             local_relations[pred_patient] = 0
         else:
             logger.info(f"pred_patient ID: {pred_patient}")

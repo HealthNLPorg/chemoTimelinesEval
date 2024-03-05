@@ -2,8 +2,9 @@
 
 ##  Evaluation script versioning
 
-#### Current timestamp (YYYY-MM-DD): 2024-02-23
-Update for 2024-02-23 version: Fix `divided by zero exception` Line 405 at `eval_timeline.py`. 
+#### Current timestamp (YYYY-MM-DD): 2024-03-05
+Update for 2024-03-05 version: Added exceptional case handling for situations where a patient doesn’t have gold standard timelines, and the system erroneously predicts timelines. In such cases, the system will now assign a score of 0 for that patient. This is described in detail in [Issue #1](https://github.com/HealthNLPorg/chemoTimelinesEval/issues/1).
+<br>Update for 2024-02-23 version: Fix `divided by zero exception` Line 405 at `eval_timeline.py`. 
 <br>Update for 2024-01-16 version: Initial release.
 
 #### Notice:
