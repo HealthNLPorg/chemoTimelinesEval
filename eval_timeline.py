@@ -7,7 +7,7 @@ from datetime import datetime
 
 import dateutil.parser
 
-VERSION = "v20240223"
+VERSION = "v20240305"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
