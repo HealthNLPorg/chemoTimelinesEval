@@ -1,16 +1,17 @@
-# Evaluation code for ChemoTimelines 2024 
+# Evaluation code for ChemoTimelines 2025 
 
 ##  Evaluation script versioning
 
-#### Current timestamp (YYYY-MM-DD): 2024-03-05
-Update for 2024-03-05 version: Added exceptional case handling for situations where a patient doesn’t have gold standard timelines, and the system erroneously predicts timelines. In such cases, the system will now assign a score of 0 for that patient. This is described in detail in [Issue #1](https://github.com/HealthNLPorg/chemoTimelinesEval/issues/1).
+#### Current timestamp (YYYY-MM-DD): 2025-04-03
+Update for 2025-04-03 version: README updated to reflect the official score change. (For 2025, we now use the **strict** instead of the relaxed)
+<br>Update for 2024-03-05 version: Added exceptional case handling for situations where a patient doesn’t have gold standard timelines, and the system erroneously predicts timelines. In such cases, the system will now assign a score of 0 for that patient. This is described in detail in [Issue #1](https://github.com/HealthNLPorg/chemoTimelinesEval/issues/1).
 <br>Update for 2024-02-23 version: Fix `divided by zero exception` Line 405 at `eval_timeline.py`. 
 <br>Update for 2024-01-16 version: Initial release.
 
 #### Notice:
-We have internally reviewed this script multiple times. However, should there be any concerns or feedback (i.e., if you find errors in this code), please let us know. We are open to feedback on the code until ~February 16, 2024~ **March 10, 2024**, and will respond within 3 calendar days.
+We have internally reviewed this script multiple times. However, should there be any concerns or feedback (i.e., if you find errors in this code), please let us know. We are open to feedback on the code until **May 26, 2025**, and will respond within 3 calendar days.
 
-~February 21, 2024~ **March 20, 2024** (Updated to reflect the changes in Important Dates), is the cut-off date for the final update in the unlikely event of updating this script. Please mark this date for the final sync (`git pull origin current`) of this repository. The code will not be updated after this date to minimize confusion.
+**June 9th, 2025** (Updated to reflect the changes in Important Dates), is the cut-off date for the final update in the unlikely event of updating this script. Please mark this date for the final sync (`git pull origin current`) of this repository. The code will not be updated after this date to minimize confusion.
 
 
 ## Summarizing Docker output
@@ -99,16 +100,21 @@ export DATA_PATH=<path/to/data>
 export PRED_PATH=<path/to/prediction>
 export ID_PATH=<path/to/id files>
     
-python eval_timeline.py \
-    --gold_path ${DATA_PATH}/breast_dev_gold_timelines.json \
-    --pred_path ${PRED_PATH}/breast_dev_system_timelines.json \
-    --all_id_path ${ID_PATH}/breast_dev_all_ids.txt \
-    --strict
-
 # This option will show the official score
 python eval_timeline.py \
     --gold_path ${DATA_PATH}/breast_dev_gold_timelines.json \
     --pred_path ${PRED_PATH}/breast_dev_system_timelines.json \
     --all_id_path ${ID_PATH}/breast_dev_all_ids.txt \
+    --strict
+```
+
+```bash
+# The --relaxed_to month setting is no longer used for official scoring
+"""
+python eval_timeline.py \
+    --gold_path ${DATA_PATH}/breast_dev_gold_timelines.json \
+    --pred_path ${PRED_PATH}/breast_dev_system_timelines.json \
+    --all_id_path ${ID_PATH}/breast_dev_all_ids.txt \
     --relaxed_to month
+"""
 ```
